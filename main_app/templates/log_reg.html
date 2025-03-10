@@ -1,0 +1,270 @@
+{% load static %}
+<html>
+    <head>
+        
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+        <link href="{% static 'css/log_reg.css' %}" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+        <title>Interview Preparation</title>
+        <!-- jquery -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <style>
+          body
+          {
+    background-image:url("{% static 'img/artificial-intelligence-background-.jpg' %}");
+    background-position:center;
+    background-repeat: no-repeat;
+    background-size: 100%;
+          } 
+        </style>
+    </head>
+    <body >
+        <!--logo-->
+        <div class="logo">
+           <a href="{% url 'home' %}"> <img src="{% static 'img/LOGO (2).png' %}" style="height: 80px; width:80px;"></a>
+        </div>
+        <!--warning initial-->
+        <div class="alert alert-primary alert-dismissible fade show" role="alert" style="display: flex; justify-content: center; align-items: center; margin-right: 200px; margin-left: 200px;">
+            <strong>PLEASE REGISTER FIRST IF YOU DON'T HAVE ACCOUNT </strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <!--area of the form-->
+        <!-- <div class="area" id="area"> -->
+            <!--top login and register button-->
+            <div class="area" id="area">
+        <!--
+              <div class="btn1">
+                  <button type="button" class="btn btn-primary" onclick="login()">LOGIN</button>
+                  <button type="button" class="btn btn-primary" onclick="register()">REGISTER</button>
+              </div>
+        -->
+              <div class="heading">
+                <h3 id="log_heading" style="align-items:center;justify-content:  center;display: flex;"><b>LOGIN</b></h3>
+                <h3 id="reg_heading" style="align-items:center;justify-content:  center;display: none;"><b>REGISTER</b></h3>
+                {% if messages %}
+                   {% for message in messages %}
+                    <p style="color:red">{{ message }}</p>
+                   {% endfor %}
+                {% endif %}
+              </div>
+            <div class="main">
+                <!--login-->
+                <div class="login" id="login">
+                    <form action="{% url 'log_reg' %}" method="POST">
+                      {% csrf_token %}
+                        <div class="mb-3">
+                          <input type="hidden" class="form-control w-100"  name="form_type" value="login_type">
+                        </div>
+                        <div class="mb-3">
+                          <label for="inputusername_log" class="form-label">username</label>
+                          <input type="text" class="form-control w-100" id="inputusername_log" name="username" aria-describedby="Username">
+                          
+                        </div>
+                        <div class="mb-3">
+                          <label for="exampleInputPassword2" class="form-label">Password</label>
+                          <input type="password" class="form-control" id="exampleInputPassword2" name="password">
+                          
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="sub_btn_log">Submit</button>
+                      </form>
+                      <hr>
+                      <!--register btn in login-->
+                      <div class="register_btn">
+                        <h6  style="display: flex;justify-content: center;align-items: center;">If you don't have account  please,</h6>
+                        <a href="#" onclick="register()"  style="display: flex;justify-content: center;align-items: center;text-decoration: none;">REGISTER</a>
+                      </div>
+                </div>
+
+
+                <!--register-->
+                <div class="register" id="register" style="display: none;">
+                    <form action="{% url 'log_reg' %}" method="POST" id="registerform">
+                      {% csrf_token %}
+                        <div class="mb-3">
+                         <input type="hidden" class="form-control w-100"  name="form_type" value="register_type">
+                        </div>
+                        <div class="mb-3">
+                            <label for="Inputusername" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="inputusername" name="username">
+                            <p class="text-danger" id="errorusername">Please enter username</p>
+                          </div>
+                        <div class="mb-3">
+                            <label for="exampleInputmail" class="form-label">Email id</label>
+                            <input type="text" class="form-control" id="exampleInputmail" name="email">
+                            <p class="text-danger" id="errormail">please enter Email</p>
+                          </div>
+                        <div class="mb-3">
+                          <label for="exampleInputPassword1" class="form-label">Password</label>
+                          <input type="password" class="form-control" id="exampleInputPassword1" name="password">
+                          <p class="text-danger" id="errorpassword">please enter Password</p>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="sub_btn_reg">Submit</button>
+                      </form>
+                      <hr>
+                      <!--login btn in register-->
+                      <div class="login_btn">
+                        <h6  style="display: flex;justify-content: center;align-items: center;">If already have account please</h6>
+                        <a href="#" onclick="login()"  style="display: flex;justify-content: center;align-items: center;text-decoration: none;">LOGIN</a>
+                      </div>
+                </div>
+            </div>
+        </div>
+        <script>
+          //validation for register username
+          $(document).ready(function(){
+            $("#errorusername").hide();
+            $("#inputusername").keyup(function(){
+              validateusername()
+            })
+            function validateusername()
+            {
+              let username=$("#inputusername").val()
+              if(!username)
+            {
+              $("#errorusername").show()
+              $("#errorusername").html("please enter username")
+              return false;
+            }
+            else
+            {
+              let pattern= /^[A-Za-z0-9!@#$%^&*]+$/;
+
+              let isUserNameValid = pattern.test(username)
+              if(!isUserNameValid)
+            {
+              $("#errorusername").show()
+              $("#errorusername").html("please enter a valid username")
+              return false
+            }
+            else
+            {
+              $("#errorusername").hide();
+              return true
+            }
+            }
+            } 
+          //validate email
+           $("#errormail").hide()
+           $("#exampleInputmail").keyup(function(){
+            validmail()
+           })
+           function validmail()
+           {
+            let mail=$("#exampleInputmail").val()
+            if(!mail)
+           {
+            $('#errormail').show()
+            $('#errormail').html("please enter your e-mail")
+            return false
+           }
+           else
+           {
+            let mailpattern= /^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$/
+            let mailValid=mailpattern.test(mail)
+            if(!mailValid)
+           {
+            $('#errormail').show()
+            $('#errormail').html("please enter a valid mail id")
+            return false
+           }
+           else
+           {
+            $("#errormail").hide()
+            return true
+           }
+           }
+           }
+           //validate register password
+           $("#errorpassword").hide();
+           $("#exampleInputPassword1").keyup(function() {
+           validatepassword();
+           });
+
+           function validatepassword() {
+               let pass = $("#exampleInputPassword1").val();
+            if (!pass) {
+            $("#errorpassword").show(); // Ensure show() is called as a function
+            $("#errorpassword").html("please enter password");
+            return false
+            }
+             else {
+            let passpattern = /^(?=.*[A-Za-z])(?=.*[#,!@$%&*])(?=.*\d)[A-Za-z\d#,!@$%&*]{6,}$/;
+            let validpattern = passpattern.test(pass);
+             if (!validpattern) {
+            $("#errorpassword").show(); // Ensure show() is called as a function
+            $("#errorpassword").html("wrong password type");
+            return false
+            }
+             else
+            {
+            $("#errorpassword").hide();
+            return true
+            }
+            }
+           }
+          //  js  validation error then not able to submit
+           $("#registerform").submit(function(event){
+            if(!validateusername() || !validmail() || !validatepassword())
+           {
+             event.preventDefault();
+           }
+           });
+           });
+        </script>
+
+
+        <script>
+           // form appear and disappear js
+            var reg=document.getElementById("register");
+            var log=document.getElementById("login");
+            var area=document.getElementById("area");
+            var login_heading=document.getElementById("log_heading");
+            var reg_heading=document.getElementById("reg_heading");
+            function register()
+            {
+                reg.style.display="block";
+                log.style.display="none";
+                area.style.maxHeight="700px";
+                area.style.marginBottom="50px";
+                login_heading.style.display="none";
+                reg_heading.style.display="flex";
+            }
+            function login()
+            {
+                reg.style.display="none";
+                log.style.display="block";
+                area.style.minHeight="400px";
+                login_heading.style.display="flex";
+                reg_heading.style.display="none";
+            }
+        </script>
+        <!-- on djangovaliadtion error to stay on same form-->
+        <script>
+              document.addEventListener("DOMContentLoaded",function()
+              {
+                var form_type="{{ form_type }}"
+                var logindiv=document.getElementById("login");
+                var registerdiv=document.getElementById("register");
+                var logheading=document.getElementById("log_heading");
+                var regheading=document.getElementById("reg_heading");
+                if (form_type === 'register_type')
+              {
+                logindiv.style.display="none";
+                registerdiv.style.display="block";
+                logheading.style.display="none";
+                regheading.style.display="flex";
+              }
+              else
+              {
+                logindiv.style.display="block";
+                registerdiv.style.display="none";
+                logheading.style.display="flex";
+                regheading.style.display="none";
+              }
+              });
+        </script>
+    </body>
+    
+</html>

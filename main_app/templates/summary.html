@@ -1,0 +1,136 @@
+{% load static %}
+<!--html page for summary-->
+<html>
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <title>Interview Preparation</title>
+    <style>
+        *{
+            margin:0%;
+            padding: 0%;
+        }
+    </style>
+</head>
+<body>
+    <!--LOGO-->
+    <nav style="justify-content:space-between;align-items: center;display: flex;">
+     <div class="logo" >
+      <a href="{% url 'home' %}"><img src="{% static 'img/LOGO (2).png' %}" alt="logo" style="width: 80px;height: 80px;"></a>
+     </div>
+     <!--search bar-->
+     <div class="search">
+        <form class="d-flex" role="search">
+            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success" type="submit">Search</button>
+          </form>
+     </div>
+    </nav>
+      <!--area selection btn-->
+      <div class="summary-btn" style="justify-content: center;align-items: center;display: flex; color:blue;text-decoration: underline;" >
+        <button type="button" style="background: none; border: 0px solid white;display: none;" onclick="summary()" id="sum_btn">Summary</button> 
+      </div>
+      <div class="personality-btn" style="justify-content: center;align-items: center;display: flex; color:blue;text-decoration: underline;">
+        <button type="button" style="background: none; border: 0px solid white;" onclick="personality()" id="sum_btn2">Personality</button> 
+      </div>
+      <!--personality-->
+      <div class="personality_area" id="personality" style="display:none;" >
+      <div class="personality-heading" style=" justify-content:center;align-items: center;display: flex; color: rgb(102, 102, 240); " >
+        <h1 style="text-decoration:underline">PERSONALITY-ANALYSIS</h1>
+      </div>
+      <div class="stats">
+        <div class="p-1" style="display: flex; justify-content: center; align-items: center;">
+            <h4 style="width:200px;margin-left: 0%;">Openness :</h4>
+            <div class="progress" style="width: 50%">
+                <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width: 70%">70%</div>
+            </div>
+        </div>
+        <div class="p-2" style="display: flex; justify-content: center; align-items: center;">
+            <h4 stle="width:200px;margin-left:0%;">Conscientiousness :</h4>
+            <div class="progress" style="width: 50%">
+                <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width: 70%">70%</div>
+            </div>
+        </div>
+        
+        <div class="p-3"  style="display: flex;justify-content:center;align-items:center; padding: 8px;">
+            <h4 style="width:200px;margin-left:0%;">Extraversion :</h4><div class="progress" style="width: 50%">
+                <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width: 70%">70%</div>
+            </div>
+        </div>
+        <div class="p-4"  style="display: flex;justify-content:center;align-items:center;padding: 8px;">
+            <h4 style="width: 200px;margin-left:0%;">Agreeableness :</h4><div class="progress" style="width: 50%">
+                <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width: 70%">70%</div>
+            </div>
+        </div>
+
+        <div class="p-5"  style="display: flex;justify-content:center;align-items:center;padding: 8px;">
+            <h4 style="width: 200px;margin-left:0%;">Neuroticism :</h4><div class="progress" style="width: 50%">
+                <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width: 70%">70%</div>
+            </div>
+        </div>
+        </div>
+        </div>
+      
+    
+    
+    <!--HEADING SUMMARY-->
+    <div class="summary_section" id="summary">
+        <div class="heading" style=" justify-content:center;align-items: center;display: flex; color: rgb(102, 102, 240);" >
+            <h1 style="text-decoration:underline">SUMMARY</h1>
+        </div>
+        <!--summary box-->
+        <div class="each_summary" style="width: 100%;min-height: 400px;justify-content:center;align-items: center;display: flex;">
+            <div class="card" style="width: 80%; border:2px solid blue;">
+                <div class="card-header" style="width: 100%;background-color: lightblue;display:flex;justify-content: center;align-items: center;">
+                    <strong>date</strong><button type="button" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Delete Permanently" class="btn-close"  style="margin-left:80% ;" ></button>
+                </div>
+                <div class="card-body">
+                  <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                </div>
+              </div>
+        </div>
+    </div>
+    <script>
+        var summ=document.getElementById('summary');
+        var per=document.getElementById('personality');
+        var sbtn1=document.getElementById('sum_btn');
+        var sbtn2=document.getElementById('sum_btn2');
+        $(document).ready(function() {
+          $("#sum_btn").click(function(){
+          $("#summary").fadeIn(1000);
+         summ.style.display = "block";
+         });
+         });
+        function summary()
+        {
+            
+            per.style.display="none";
+            sbtn1.style.display="none";
+            sbtn2.style.display="block";
+            
+        }
+        $(document).ready(function() {
+           $("#sum_btn2").click(function(){
+           $("#personality").fadeIn(1000);
+           per.style.display = "block";
+           });
+        });
+
+        function personality()
+        {
+            summ.style.display="none";
+          
+            sbtn1.style.display="block";
+            sbtn2.style.display="none";  
+
+        }
+        
+        $(document).ready(function(){
+            $('[data-bs-toggle="popover"]').popover();   
+        });
+    
+    </script>
+</body>
+</html>
+<!--<button type="button" class="btn-close" aria-label="Close" style="margin-left:80% ;" ></button>-->
