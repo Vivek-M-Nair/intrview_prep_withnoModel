@@ -1,7 +1,7 @@
 
 var field = document.getElementById("field");
 var discription=document.getElementById("discription");
-var resume_area=document.getElementById("resume_area");
+// var resume_area=document.getElementById("resume_area");
 var button=document.getElementById("button");
 var main_area=document.getElementById("main_area");
 var hr=document.getElementById("hr");
@@ -10,7 +10,7 @@ var next=document.getElementById("next");
 var area=document.getElementById("area");
 function start() {
     field.style.display = "none";
-    resume_area.style.display = "none";
+    // resume_area.style.display = "none";
     discription.style.display = "none";
     button.style.display = "none";
     hr.style.display = "none";

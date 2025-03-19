@@ -43,30 +43,30 @@
         <div class="p-1" style="display: flex; justify-content: center; align-items: center;">
             <h4 style="width:200px;margin-left: 0%;">Openness :</h4>
             <div class="progress" style="width: 50%">
-                <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width: 70%">70%</div>
+                <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width: 70%" id="Openness">70%</div>
             </div>
         </div>
         <div class="p-2" style="display: flex; justify-content: center; align-items: center;">
             <h4 stle="width:200px;margin-left:0%;">Conscientiousness :</h4>
             <div class="progress" style="width: 50%">
-                <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width: 70%">70%</div>
+                <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width: 70%" id="Conscientiousness">70%</div>
             </div>
         </div>
         
         <div class="p-3"  style="display: flex;justify-content:center;align-items:center; padding: 8px;">
             <h4 style="width:200px;margin-left:0%;">Extraversion :</h4><div class="progress" style="width: 50%">
-                <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width: 70%">70%</div>
+                <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width: 70%" id="Extraversion">70%</div>
             </div>
         </div>
         <div class="p-4"  style="display: flex;justify-content:center;align-items:center;padding: 8px;">
             <h4 style="width: 200px;margin-left:0%;">Agreeableness :</h4><div class="progress" style="width: 50%">
-                <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width: 70%">70%</div>
+                <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width: 70%" id="Agreeableness">70%</div>
             </div>
         </div>
 
         <div class="p-5"  style="display: flex;justify-content:center;align-items:center;padding: 8px;">
             <h4 style="width: 200px;margin-left:0%;">Neuroticism :</h4><div class="progress" style="width: 50%">
-                <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width: 70%">70%</div>
+                <div class="progress-bar" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width: 70%" id="Neuroticism">70%</div>
             </div>
         </div>
         </div>
@@ -80,16 +80,25 @@
             <h1 style="text-decoration:underline">SUMMARY</h1>
         </div>
         <!--summary box-->
-        <div class="each_summary" style="width: 100%;min-height: 400px;justify-content:center;align-items: center;display: flex;">
-            <div class="card" style="width: 80%; border:2px solid blue;">
-                <div class="card-header" style="width: 100%;background-color: lightblue;display:flex;justify-content: center;align-items: center;">
-                    <strong>date</strong><button type="button" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Delete Permanently" class="btn-close"  style="margin-left:80% ;" ></button>
+       {% for summary in summary_list %}
+        <div class="each_summary" id="each_summary" style="width: 100%; min-height: 280px; justify-content: center; display: flex; margin-top: {% if forloop.counter > 1 %}0px{% else %}40px{% endif %};">
+            <div class="card" style="width: 80%; border: 2px solid blue;" id="card_summary">
+                <div class="card-header" style="width: 100%; background-color: lightblue; display: flex; justify-content: center; align-items: center;">
+                    <strong class="date">{{ summary.created_at }}</summary></strong>
+                    <button type="button" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Delete Permanently" class="btn-close" style="margin-left: 80%;"></button>
                 </div>
                 <div class="card-body">
-                  <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                    <p class="card-text" style="white-space: pre-line;">Question: {{ summary.question }}</p>
+                    <p class="card-text" style="white-space: pre-line;">Your Answer: {{ summary.user_ans }}</p>
+                    <p class="card-text" style="white-space: pre-line;">Feedback: {{ summary.feedback }}</p>
+                    <p class="card-text" style="white-space: pre-line;">Suggested Answer: {{ summary.suggested_answer }}</p>
                 </div>
-              </div>
+            </div>
         </div>
+        {% empty %}
+        <p>No summaries available!</p>
+
+        {% endfor %}
     </div>
     <script>
         var summ=document.getElementById('summary');
@@ -129,7 +138,36 @@
         $(document).ready(function(){
             $('[data-bs-toggle="popover"]').popover();   
         });
-    
+        var Openness=document.getElementById('Openness');
+        var Extraversion=document.getElementById('Extraversion');
+        var Conscientiousness=document.getElementById('Conscientiousness');
+        var Neuroticism=document.getElementById('Neuroticism');
+        var Agreeableness=document.getElementById('Agreeableness');
+        var traits=JSON.parse('{{ personality|escapejs }}');
+        console.log(traits)
+        if(traits)
+        {
+            Openness.setAttribute("aria-valuenow",traits["openness"]);
+            Openness.style.width=traits["openness"]+"%";
+            Openness.innerText=traits["openness"]+"%";
+
+            Conscientiousness.setAttribute("aria-valuenow",traits["conscientiousness"]);
+            Conscientiousness.style.width=traits["conscientiousness"]+"%";
+            Conscientiousness.innerText=traits["conscientiousness"]+"%";
+
+            Extraversion.setAttribute("aria-valuenow",traits["extraversion"]);
+            Extraversion.style.width=traits["extraversion"]+"%";
+            Extraversion.innerText=traits["extraversion"]+"%";
+
+            Agreeableness.setAttribute("aria-valuenow",traits["agreeableness"]);
+            Agreeableness.style.width=traits["agreeableness"]+"%";
+            Agreeableness.innerText=traits["agreeableness"]+"%";
+
+            Neuroticism.setAttribute("aria-valuenow",traits["neuroticism"]);
+            Neuroticism.style.width=traits["neuroticism"]+"%";
+            Neuroticism.innerText=traits["neuroticism"]+"%";
+
+        }
     </script>
 </body>
 </html>
