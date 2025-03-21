@@ -11,7 +11,8 @@ import json
 from django.contrib.auth.decorators import login_required 
 from .models import Interviewprep   
 import random 
-from .models import Personality                             
+from .models import Personality 
+from django.http import JsonResponse                            
 
 # from django.http import HttpResponse
 
@@ -104,20 +105,21 @@ def home(request):
     user=request.user
     # quesion generation
     if request.method=="POST":
-      action = request.POST.get('action')
-      if action in ['Generate_question']:
-        Job_detailss=Job_details(request.POST)
-        if Job_detailss.is_valid():
-          domain=Job_detailss.cleaned_data['domain']
-          job_description=Job_detailss.cleaned_data['description']
-          request.session['domain']=domain
-          request.session['job_description']=job_description
-          prompt=f"Generate a technical interview question for a {domain} role.The involves:{job_description}"
-          question_output=question_generator(prompt,max_length=50,temperature=0.7,do_sample=True,top_p=0.9,num_return_sequences=1)[0]['generated_text']
-          Finals=Interviewprep.objects.create(user=user,domain=domain,description=job_description,question=question_output)
-          Finals.save()
+       action = request.POST.get('action')
+    #   if action in ['Generate_question']:
+    #     Job_detailss=Job_details(request.POST)
+    #     if Job_detailss.is_valid():
+    #       domain=Job_detailss.cleaned_data['domain']
+    #       job_description=Job_detailss.cleaned_data['description']
+    #       request.session['domain']=domain
+    #       request.session['job_description']=job_description
+    #       prompt=f"Generate a technical interview question for a {domain} role.The involves:{job_description}"
+    #       question_output=question_generator(prompt,max_length=50,temperature=0.7,do_sample=True,top_p=0.9,num_return_sequences=1)[0]['generated_text']
+    #       Finals=Interviewprep.objects.create(user=user,domain=domain,description=job_description,question=question_output)
+    #       Finals.save()
+    #     return JsonResponse({"question":Finals.question if Finals is not None else ''})
 
-      elif action =="submit_for_AI":
+       if action =="submit_for_AI":
          Finals_id=request.POST.get('practice_id')
          Finals=get_object_or_404(Interviewprep,id=Finals_id)
          AnsFormm=AnsForm(request.POST,instance=Finals)
@@ -137,7 +139,7 @@ def home(request):
             Finals.suggested_answer=suggested_ans
          Finals.save()
 
-      elif action =="suggested_answer":
+       elif action =="suggested_answer":
          Finals_id=request.POST.get('practice_id')
          Finals=get_object_or_404(Interviewprep,id=Finals_id)  
          if not Finals.suggested_answer:
@@ -146,7 +148,7 @@ def home(request):
             Finals.suggested_answer=suggested_ans
          Finals.save()
 
-      elif action=="next_qn":
+       elif action=="next_qn":
          domain=request.session['domain']
          job_description=request.session['job_description']
          prompt=f"Generate a technical interview question for a {domain} role.The involves:{job_description}"
@@ -158,12 +160,12 @@ def home(request):
 
 
     return render(request,'home.html',{'AnsForm':AnsFormm,'Job_details':Job_detailss,'loged_in':user,
-                                       'question':Finals.question if Finals is not None else '',
+                                    #    'question':Finals.question if Finals is not None else '',
                                        "practice_id":Finals.id if Finals is not None else '',
                                        "feedback":Finals.feedback if Finals is not None else '',
                                        "Suggested_ans":Finals.suggested_answer if Finals is not None else ''})
 
-from django.http import JsonResponse
+
 # get job_description
 def get_job_description(request):
     domain=request.GET.get('domain')
@@ -240,3 +242,94 @@ def summary(request):
    )
 
    return render(request,'summary.html',{"personality":json.dumps(traits),"summary_list":summary_list})
+ 
+from django.http import JsonResponse
+from .models import Interviewprep
+from .forms import Job_details
+
+
+def generate_question(request):
+    if request.method == "POST":
+        
+        Job_detailss = Job_details(request.POST)
+        if not Job_detailss.is_valid():
+               print("Form Errors:", Job_detailss.errors)  # Debugging
+               return JsonResponse({'error': 'Invalid form data'}, status=400)
+        # Rest of your logic...
+
+        domain = Job_detailss.cleaned_data['domain']
+        job_description = Job_detailss.cleaned_data['description']
+        request.session['domain'] = domain
+        request.session['job_description'] = job_description
+                
+                # Generate question
+        prompt = f"Generate a technical interview question for a {domain} role. The job involves: {job_description}"
+        question_output = question_generator(
+                        prompt, 
+                        max_length=50, 
+                        temperature=0.7, 
+                        do_sample=True, 
+                        top_p=0.9, 
+                        num_return_sequences=1
+                    )[0]['generated_text']
+       
+                # Save to database
+        Finals = Interviewprep.objects.create(
+                    user=request.user, 
+                    domain=domain, 
+                    description=job_description, 
+                    question=question_output
+                )
+        Finals.save()
+                
+        return JsonResponse({"question": Finals.question,"practice_id":Finals.id if Finals is not None else ''})
+
+
+def generateFeed_ans(request):
+    if request.method=="POST":
+         Finals_id=request.POST.get('practice_id')
+         Finals=get_object_or_404(Interviewprep,id=Finals_id)
+         AnsFormm=AnsForm(request.POST,instance=Finals)
+         if AnsFormm.is_valid():
+            Finals.user_ans=AnsFormm.cleaned_data['user_ans']
+            Finals.save()
+            
+            feedback_output=feedback(Finals.user_ans)[0]
+            label,score=feedback_output['label'],feedback_output['score']
+            feedback_Ans="😀Excellent Answer,Keep going🥳."if label=="POSITIVE" and score > 0.90 else \
+                         "(●'◡'●)Good Answer,but need some improvement" if label=="POSITIVE" and score >0.75 else\
+                         "⚠Need Improvement,Keep practicing."
+            Finals.feedback=feedback_Ans
+
+         if not Finals.suggested_answer:
+            prompt=f"provide a structured answer for the interview question:{Finals.question} based on {Finals.description}"
+            suggested_ans=answer_generator(prompt,max_length=500,top_p=0.9,temperature=0.7,top_k=50,num_return_sequences=1)[0]['generated_text']
+            Finals.suggested_answer=suggested_ans
+         Finals.save()
+         return JsonResponse({"feedback":Finals.feedback,"Suggested_ans":Finals.suggested_answer} )
+
+
+def AI_answer(request):
+   if request.method=="POST":
+     Finals_id=request.POST.get('practice_id')
+     Finals=get_object_or_404(Interviewprep,id=Finals_id)  
+     if not Finals.suggested_answer:
+            prompt=f"provide a structured answer for the interview question:{Finals.question} based on {Finals.description}"
+            suggested_ans=answer_generator(prompt,max_length=500,top_p=0.9,temperature=0.7,num_return_sequences=1)[0]['generated_text']
+            Finals.suggested_answer=suggested_ans
+     Finals.save()
+     return JsonResponse({"Suggested_ans":Finals.suggested_answer})
+
+
+def Next_question(request):   
+    if request.method=="POST":
+         domain=request.session['domain']
+         job_description=request.session['job_description']
+         prompt=f"Generate a technical interview question for a {domain} role.The involves:{job_description}"
+         question_output=question_generator(prompt,max_length=50,temperature=0.7,do_sample=True,top_p=0.9,num_return_sequences=1)[0]['generated_text']
+         Finals=Interviewprep.objects.create(user=request.user,domain=domain,description=job_description,question=question_output)
+         Finals.save()
+         return JsonResponse({"question": Finals.question,"practice_id":Finals.id if Finals is not None else ''})
+
+         
+        

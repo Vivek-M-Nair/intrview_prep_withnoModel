@@ -19,3 +19,4 @@ class AnsForm(forms.ModelForm):
     class Meta:
         model=Interviewprep
         fields=['user_ans']
+    user_ans=forms.CharField(required=True,widget=forms.Textarea(attrs={'placeholder':'Enter your answer','name':'user_ans'}))

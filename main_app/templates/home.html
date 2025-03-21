@@ -7,6 +7,23 @@
         <title>Interview preparation</title>
         <link href="{% static 'css/home.css' %}" rel="stylesheet">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <style>
+          .intro
+     {
+    height:25vh;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    text-align: center;
+    margin-bottom: 20px;
+    background-image:url("{% static 'img/bg6.jpg' %}");
+    background-position:center;
+    background-repeat: no-repeat;
+    background-size: 100%;
+
+     }
+        </style>
     </head>
     <body>
       <header>
@@ -94,13 +111,13 @@
           </div>
             </div> -->
           <div class="start-btn">
-           <button type="submit" name="action" value="Generate_question" id="button" onclick="start()">Generate Question</button>
+           <button type="submit" name="action" value="Generate_question" id="button" >Generate Question</button>
           </div>
       
  </form> 
       <!--area in which quesrion,feedback and sugested ans is shown this area appears only if btn-generate question is clicked-->
      <section id="area"><!--section of area-->
-        <div class="main_area" id="main_area"style="display: flex;">
+        <div class="main_area" id="main_area"style="display: none;">
           <div class="stop_btn" style="width: 900px;">
           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop" style="margin-bottom: 10px;margin-left: 700px;">
             End practicing
@@ -131,12 +148,18 @@
           </div>
           </div>
           </div>
-          <form action="{% url 'home' %}" method="POST">
+          <form  method="POST" id="ans_form">
             {% csrf_token %}
           <div class="card" style="width: 70rem;border :2px solid green">
             <strong class="card-header" style="background-color: rgba(67, 97, 219, 0.454);">Question</strong>
             <div class="card-body">
-              <strong class="quesrion" id="">{{ question }}</strong>
+              <div class="text-center" id="loading_qn" style="display: none;">
+                <div class="spinner-grw" >
+                <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                <span role="status">Loading...</span>
+                </div>
+              </div>
+              <strong class="quesrion" id="qn">{{ question }}</strong>
               <div class="card-body">
               <!--
                 <div class="audioopt">
@@ -147,6 +170,7 @@
               <div class="typeans">
                  <!-- <textarea class="answeretypeopt" placeholder="Enter your Answere" id="textarea" ></textarea> -->{{ AnsForm.user_ans }}
               </div>
+              <p class="text-danger" id="erroranswer" style="display: none;">please enter your message</p>
               <div class="ans">
                 <input type="hidden" name="practice_id" id="practice_id" value="{{ practice_id }}">
               </div>
@@ -156,14 +180,14 @@
                </div>
               </div>
               <!--card footer btn-->
-              <div class="card-footer">
+              <div class="card-footer" style="justify-content: space-between;width:100%">
                 <button type="button" class="feedback" onclick="feedback()" >Feedback</button>
-                <button type="submit" class="suggrstedans" name="action" value="suggested_answer">Suggested Answere</button><!--onclick="answer()"-->
+                <button type="submit" class="suggrstedans" name="action" value="suggested_answer" id="suggested_answer">Suggested Answere</button><!--onclick="answer()"-->
               </div>
             </div>
           </div>
            <!--feedback card-->
-          <div class="card" style="width: 70rem; display: flex; " id="feedback-card" >
+          <div class="card" style="width: 70rem; display: none; " id="feedback-card" >
               <strong class="card-header" style=" background-color: rgba(97, 204, 240, 0.514);">Feedback</strong>
               <div class="Feedback">
               <div class="card-body">
@@ -172,17 +196,17 @@
              </div>
           </div>
           <!--answere card-->
-          <div class="card" style="width: 70rem; display: flex;" id="answer-card">
+          <div class="card" style="width: 70rem; display: none;" id="answer-card">
             <strong class="card-header" style=" background-color: rgba(97, 204, 240, 0.413);">Suggested Answere</strong>
             <div class="card-body">
-              <p class="card-text"><strong>{{ Suggested_ans }}.</strong></p>
+              <p class="card-text"><strong id="Suggested_ans">{{ Suggested_ans }}.</strong></p>
             </div>
           </div>
           <!--ans submit button and next question button-->
           <div class="ans_submit" style="margin-top:30px;margin-bottom: 30px;  ">
             
-            <button type="submit" name="action" value="submit_for_AI" class="sub_btn_ans" id="sub" style="padding: 10px;color:white;background-color: rgba(69, 69, 238, 0.616); " >Submit for AI Feedback</button> <!---onclick="feedback_ans()"-->
-            <button type="submit" name="action" value="next_qn" class="sub_btn_ans" id="next" style="padding: 10px;color:white;background-color: rgba(69, 69, 238, 0.616); display: block;">Next Question</button><!---onclick="next_ans()"-->
+            <button type="submit" name="action" value="submit_for_AI" class="sub_btn_ans" id="sub" style="padding: 10px;color:white;background-color: rgba(69, 69, 238, 0.616); margin-left: 40%; " >Submit for AI Feedback</button> <!---onclick="feedback_ans()"-->
+            <button type="submit" name="action" value="next_qn" class="sub_btn_ans" id="next_one" style="padding: 10px;color:white;background-color: rgba(69, 69, 238, 0.616); display: none;margin-left: 40%; ">Next Question</button><!---onclick="next_ans()"-->
             
           </div>
           </form>
@@ -487,5 +511,173 @@
         }
         })
       </script>
+      <script>
+        const generateQuestionUrl = "{% url 'generate_question' %}";
+        const generateFeed_ans="{% url 'generateFeed_ans' %}";
+        const AI_answer="{% url 'AI_answer' %}";
+        const Next_question="{% url 'Next_question' %}";
+var field = document.getElementById("field");
+var discription=document.getElementById("discription");
+// var resume_area=document.getElementById("resume_area");
+var button=document.getElementById("button");
+var main_area=document.getElementById("main_area");
+var hr=document.getElementById("hr");
+var ans_sub_but=document.getElementById("sub");
+var next=document.getElementById("next_one");
+var area=document.getElementById("area");
+var loading_question=document.getElementById("loading_qn")
+button.addEventListener('click',function(event){
+    event.preventDefault()
+    var question=document.getElementById('qn')
+    var form=document.getElementById('job_detail_form')
+    var formData = new FormData(form);
+    var practice_id=document.getElementById('practice_id')
+    loading_question.style.display="block"
+    fetch(generateQuestionUrl, {
+    method: "POST",
+    body: formData,
+    headers: {
+        "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
+    }
+})
+.then(response => response.json())
+    .then(data => {
+        if (data.question) {
+            question.innerText = data.question;  // ✅ Update question text
+            question.style.display = "block"; 
+            loading_question.style.display="none" // ✅ Show the question if it was hidden
+        } 
+        practice_id.value=data.practice_id;
+    })
+    field.style.display = "none";
+    // resume_area.style.display = "none";
+    discription.style.display = "none";
+    button.style.display = "none";
+    hr.style.display = "none";
+    main_area.style.display = "flex";
+    });
+
+    // submit for AI feedbac and answer
+    var feedbacke=document.getElementById("feedback-card");
+    var answere=document.getElementById("answer-card");
+    var feedback=document.getElementById('feedback');
+    var suggested_answer=document.getElementById('Suggested_ans')
+    document.getElementById('sub').addEventListener('click',function(event){
+    event.preventDefault();
+    var ansform=document.getElementById('ans_form')
+    var ansform_data=new FormData(ansform);
+    var userAns = ansform_data.get('user_ans');  // Get the value of user_ans field
+    if (!userAns || userAns.trim() === "") 
+    {
+        document.getElementById('erroranswer').style.display="block";
+        return;  
+    }
+    else{
+    document.getElementById('erroranswer').style.display="none";
+    fetch(generateFeed_ans,{
+      method:"POST",
+      body:ansform_data,
+      headers:{
+        "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
+      }
+    })
+    .then(response=>response.json())
+    .then(data=>
+    {
+       feedback.innerText=data.feedback;
+       suggested_answer.innerText=data.Suggested_ans;
+    }
+    );
+  
+    
+    feedbacke.style.display = "flex";
+    answere.style.display = "flex"; 
+    ans_sub_but.style.display="none";
+    next.style.display="block";
+  }
+    });
+
+    // feedback card-btn
+    // var feedbacke=document.getElementById("feedback-card");
+    // var answere=document.getElementById("answer-card");
+function feedback()
+    { 
+    if(feedbacke.style.display == "flex")
+    {
+        feedbacke.style.display = "none";
+    }
+    else{
+        feedbacke.style.display = "flex";
+        if(feedback.innerText=="")
+        {
+          feedback.innerText="Sorry,No Feedback available,Please submit your Answer";
+        } 
+    }
+    }
+
+
+    //  suggested answer 
+    document.getElementById('suggested_answer').addEventListener('click',function(event){
+      event.preventDefault();
+      if(answere.style.display == "flex")
+        {
+            answere.style.display = "none";
+            next.style.display="flex";
+        }
+        else{
+            answere.style.display = "flex";
+            next.style.display="none";
+        }
+      var ansform=document.getElementById('ans_form')
+      var ansform_data=new FormData(ansform);
+      fetch(AI_answer,{
+        method:"POST",
+        body:ansform_data,
+        headers:{
+          "X-CSRFToken":document.querySelector('[name=csrfmiddlewaretoken]').value
+        } 
+      })
+      .then(response=>response.json())
+      .then(data=>{
+        suggested_answer.innerText=data.Suggested_ans;
+      });
+    }); 
+
+
+    // next question
+    document.getElementById('next_one').addEventListener('click',function(event){
+    event.preventDefault();
+    document.querySelector("user_ans").innerText="";
+    var nextform=document.getElementById('ans_form')
+    var nextform_data=new FormData(nextform);
+    var question=document.getElementById('qn')
+    var practice_id=document.getElementById('practice_id')
+    fetch(Next_question,{
+        method:"POST",
+        body:nextform_data,
+        headers:{
+          "X-CSRFToken":document.querySelector('[name=csrfmiddlewaretoken]').value
+        } 
+      })
+      .then(response=>response.json())
+      .then(data => {
+        if (data.question) {
+            question.innerText = data.question;  // ✅ Update question text
+            question.style.display = "block"; 
+            loading_question.style.display="none" // ✅ Show the question if it was hidden
+        } 
+        practice_id.value=data.practice_id;
+    });
+    next.style.display="none";
+    ans_sub_but.style.display="block";
+    feedbacke.style.display = "none";
+    answere.style.display = "none"; 
+    area.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
+
+    });
+    </script>
     </body>
 </html>
